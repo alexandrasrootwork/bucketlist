@@ -1,9 +1,9 @@
 /* --- General Font & Body --- */
 body {
   font-family: 'Press Start 2P', monospace;
-  background: #d97bb3;
+  background: #d97bb3; /* pink desktop */
   margin: 0;
-  overflow: hidden;
+  overflow: hidden; /* Prevent page scrolling on mobile */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,7 +14,7 @@ body {
 .window {
   width: 500px;
   height: 600px;
-  background: #c0c0c0;
+  background: #c0c0c0; /* window frame */
   border: 2px solid #000;
   box-shadow: 4px 4px 0 #7a7a7a;
   display: flex;
@@ -78,29 +78,27 @@ body {
 
 /* --- Individual Bucket Item --- */
 .bucket-item {
-  margin-bottom: 16px;
-  padding: 10px;
+  margin-bottom: 18px;
+  padding: 8px;
   border: 1px solid #c0c0c0;
-  background: #f8f8f8;
+  background: #ffffff;
 }
 
 .bucket-item.completed {
-  background: #e0ffe0;
-  opacity: 0.85;
+  background: #e8ffe8;
 }
 
 .item-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 .checkmark {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
-  accent-color: #000080;
 }
 
 .item-title {
@@ -129,18 +127,18 @@ body {
 }
 
 .item-details {
-  margin-left: 30px;
+  margin-left: 24px;
   font-size: 11px;
   color: #555;
 }
 
 .completed-date {
-  margin: 5px 0;
+  margin: 4px 0;
   color: #2d6a2d;
 }
 
 .item-notes {
-  margin: 5px 0;
+  margin: 4px 0;
   font-style: italic;
 }
 
@@ -161,7 +159,7 @@ body {
   padding: 2px 5px;
 }
 
-/* --- Popups --- */
+/* --- Popup (exactly matching your review popup) --- */
 .bucket-popup {
   border: 2px solid #000;
   background: #C0C0C0;
@@ -173,9 +171,13 @@ body {
   width: 400px;
   min-width: 300px;
   max-width: 500px;
+  padding: 0;
   z-index: 1000;
   box-shadow: 4px 4px 0 #7a7a7a;
   flex-direction: column;
+  resize: both;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .bucket-popup .title-bar {
@@ -192,18 +194,30 @@ body {
 
 .bucket-popup .buttons span {
   cursor: pointer;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  background: #c0c0c0;
+  border: 1px solid #000;
+  text-align: center;
+  line-height: 14px;
+  font-size: 11px;
+  color: black;
 }
 
 .bucket-popup .content {
   background: #dcdcdc;
-  padding: 12px;
+  padding: 8px;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-size: 13px;
+  line-height: 1.4;
   overflow: auto;
-  max-height: 400px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-/* --- Form Elements --- */
+/* --- Form Elements (retro style) --- */
 .retro-button {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-size: 13px;
@@ -213,7 +227,6 @@ body {
   box-shadow: inset -2px -2px 0 #808080, inset 2px 2px 0 #FFF;
   cursor: pointer;
   color: #000;
-  margin-top: 10px;
 }
 
 .retro-button:hover {
@@ -229,12 +242,17 @@ input, textarea {
   border: 1px solid #808080;
 }
 
+textarea {
+  resize: none;
+}
+
 /* --- Progress Bar --- */
 .progress-section {
   padding: 8px;
   background: #c0c0c0;
   border-top: 1px solid #808080;
   font-size: 11px;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
 .progress-bar-bg {
@@ -250,18 +268,35 @@ input, textarea {
   width: 0%;
 }
 
-/* --- Mobile --- */
+/* --- Mobile one-page bucket list --- */
 @media (max-width: 768px) {
   .window {
     position: fixed !important;
     inset: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
     margin: 0 !important;
     border-radius: 0;
     box-shadow: none;
   }
+
   body, html {
+    overflow: hidden;
+  }
+
+  .bucket-popup {
+    width: 400px;
+    height: 250px;
+    max-width: 90%;
+    max-height: 90%;
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    flex-direction: column;
     overflow: hidden;
   }
 }
