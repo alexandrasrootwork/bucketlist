@@ -1,5 +1,6 @@
 // --- Data storage (localStorage) ---
 let bucketItems = [];
+let currentFilter = 'all'; // 'all', 'completed', 'pending'
 
 // Load from localStorage
 function loadData() {
@@ -7,9 +8,8 @@ function loadData() {
   if (saved) {
     bucketItems = JSON.parse(saved);
   } else {
-    // Sample items with local image examples
     bucketItems = [
-      { id: Date.now(), title: "Visit Japan", completed: false, notes: "Add image: images/japan.jpg", image: "", completedDate: null },
+      { id: Date.now(), title: "Visit Japan", completed: false, notes: "", image: "", completedDate: null },
       { id: Date.now() + 1, title: "Learn to code", completed: true, notes: "Built this website!", image: "", completedDate: "2025-03-15" }
     ];
   }
@@ -22,7 +22,7 @@ function saveData() {
   render();
 }
 
-// Escape HTML to prevent XSS
+// Escape HTML
 function escapeHtml(str) {
   if (!str) return '';
   return str.replace(/[&<>]/g, function(m) {
@@ -33,28 +33,50 @@ function escapeHtml(str) {
   });
 }
 
-// Helper to fix image path
+// Get image path
 function getImagePath(path) {
   if (!path) return '';
-  // If path doesn't start with images/ and isn't a full URL, add images/
   if (!path.startsWith('images/') && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
     return 'images/' + path;
   }
   return path;
 }
 
-// Render all items
+// Render items based on current filter
 function render() {
   const container = document.getElementById('bucketContainer');
   if (!container) return;
   
+  // Keep the info box
+  const infoBox = container.querySelector('.info-box');
   container.innerHTML = '';
+  if (infoBox) container.appendChild(infoBox);
   
-  const incomplete = bucketItems.filter(item => !item.completed);
-  const complete = bucketItems.filter(item => item.completed);
-  const sorted = [...incomplete, ...complete];
+  let filteredItems = [...bucketItems];
   
-  sorted.forEach(item => {
+  if (currentFilter === 'completed') {
+    filteredItems = bucketItems.filter(item => item.completed);
+  } else if (currentFilter === 'pending') {
+    filteredItems = bucketItems.filter(item => !item.completed);
+  } else {
+    // 'all' - show incomplete first, then completed
+    const incomplete = bucketItems.filter(item => !item.completed);
+    const complete = bucketItems.filter(item => item.completed);
+    filteredItems = [...incomplete, ...complete];
+  }
+  
+  if (filteredItems.length === 0) {
+    const emptyMsg = document.createElement('div');
+    emptyMsg.style.padding = '20px';
+    emptyMsg.style.textAlign = 'center';
+    emptyMsg.style.color = '#999';
+    emptyMsg.innerHTML = currentFilter === 'completed' ? '✅ No completed items yet!' : 
+                         currentFilter === 'pending' ? '⏳ Nothing pending — you\'re done!' : 
+                         '📝 Add your first bucket list item!';
+    container.appendChild(emptyMsg);
+  }
+  
+  filteredItems.forEach(item => {
     const div = document.createElement('div');
     div.className = `bucket-item ${item.completed ? 'completed' : ''}`;
     
@@ -64,13 +86,13 @@ function render() {
     div.innerHTML = `
       <div class="item-header">
         <input type="checkbox" class="checkmark" data-id="${item.id}" ${item.completed ? 'checked' : ''}>
-        <span class="item-title ${completedClass}">${escapeHtml(item.title)}</span>
+        <span class="item-title ${completedClass}" data-id="${item.id}" data-title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</span>
         <button class="delete-btn" data-id="${item.id}">✗</button>
       </div>
       <div class="item-details">
         ${item.completedDate ? `<div class="completed-date">✅ Completed: ${escapeHtml(item.completedDate)}</div>` : ''}
         ${item.notes ? `<div class="item-notes">📝 ${escapeHtml(item.notes)}</div>` : ''}
-        ${item.image ? `<img src="${escapeHtml(imagePath)}" class="item-image" onerror="this.style.display='none'; this.nextSibling ? this.nextSibling.style.display='inline' : null"><span style="display:none; font-size:10px; color:#999;">⚠️ Image not found. Put ${escapeHtml(item.image)} in your images/ folder</span>` : ''}
+        ${item.image ? `<img src="${escapeHtml(imagePath)}" class="item-image" data-fullsrc="${escapeHtml(imagePath)}" onerror="this.style.display='none'; this.nextSibling ? this.nextSibling.style.display='inline' : null"><span style="display:none; font-size:10px; color:#999;">⚠️ Image not found. Put ${escapeHtml(item.image)} in your images/ folder</span>` : ''}
         <div>
           <button class="edit-btn" data-id="${item.id}" data-type="notes">✏️ Edit Notes</button>
           <button class="edit-btn" data-id="${item.id}" data-type="image">🖼️ Add/Change Image</button>
@@ -113,6 +135,76 @@ function render() {
       openEditPopup(id, type);
     });
   });
+  
+  // Title click to edit
+  document.querySelectorAll('.item-title').forEach(titleSpan => {
+    titleSpan.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = parseInt(titleSpan.dataset.id);
+      startEditTitle(id, titleSpan);
+    });
+  });
+  
+  // Image click to enlarge
+  document.querySelectorAll('.item-image').forEach(img => {
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const fullSrc = img.dataset.fullsrc || img.src;
+      openLightbox(fullSrc);
+    });
+  });
+}
+
+// Lightbox functions
+function openLightbox(src) {
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  if (lightbox && lightboxImg) {
+    lightboxImg.src = src;
+    lightbox.style.display = 'flex';
+  }
+}
+
+function closeLightbox() {
+  const lightbox = document.getElementById('lightbox');
+  if (lightbox) {
+    lightbox.style.display = 'none';
+  }
+}
+
+// Inline title editing
+function startEditTitle(id, titleSpan) {
+  const currentTitle = titleSpan.dataset.title;
+  
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = currentTitle;
+  input.className = 'title-input';
+  
+  titleSpan.style.display = 'none';
+  titleSpan.parentNode.insertBefore(input, titleSpan);
+  input.focus();
+  
+  function saveEdit() {
+    const newTitle = input.value.trim();
+    if (newTitle) {
+      const item = bucketItems.find(i => i.id === id);
+      if (item) {
+        item.title = newTitle;
+        saveData();
+      }
+    }
+    input.remove();
+    titleSpan.style.display = '';
+    render(); // Re-render to refresh
+  }
+  
+  input.addEventListener('blur', saveEdit);
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      saveEdit();
+    }
+  });
 }
 
 // Toggle complete status
@@ -137,7 +229,20 @@ function deleteItem(id) {
   }
 }
 
-// --- Bulk Add Function ---
+// Tab switching
+function setupTabs() {
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentFilter = tab.dataset.tab;
+      render();
+    });
+  });
+}
+
+// Bulk Add Function
 function openBulkAddPopup() {
   const bulkHtml = `
     <div class="bucket-popup" id="bulkPopup" style="display:flex;">
@@ -218,7 +323,6 @@ const popup = document.getElementById('bucketPopup');
 const editPopup = document.getElementById('editPopup');
 let currentEditId = null;
 
-// Open add popup
 const openAddButton = document.getElementById('openAddWindow');
 if (openAddButton) {
   openAddButton.addEventListener('click', () => {
@@ -232,7 +336,6 @@ if (openAddButton) {
   });
 }
 
-// Bulk add button
 const bulkAddButton = document.getElementById('bulkAddWindow');
 if (bulkAddButton) {
   bulkAddButton.addEventListener('click', () => {
@@ -240,7 +343,6 @@ if (bulkAddButton) {
   });
 }
 
-// Close add popup
 const closePopup = document.getElementById('closePopup');
 if (closePopup) {
   closePopup.addEventListener('click', () => {
@@ -248,7 +350,6 @@ if (closePopup) {
   });
 }
 
-// Close edit popup
 const closeEditPopup = document.getElementById('closeEditPopup');
 if (closeEditPopup) {
   closeEditPopup.addEventListener('click', () => {
@@ -256,7 +357,6 @@ if (closeEditPopup) {
   });
 }
 
-// Submit new item
 const submitButton = document.getElementById('submitButton');
 if (submitButton) {
   submitButton.addEventListener('click', () => {
@@ -285,7 +385,6 @@ if (submitButton) {
   });
 }
 
-// Open edit popup
 function openEditPopup(id, type) {
   currentEditId = id;
   const item = bucketItems.find(i => i.id === id);
@@ -299,7 +398,6 @@ function openEditPopup(id, type) {
   if (editImage) editImage.value = item.image || '';
   if (editDate) editDate.value = item.completedDate || '';
   
-  // Add helpful placeholder text for images
   if (editImage) {
     editImage.placeholder = 'images/filename.jpg (or just filename.jpg)';
   }
@@ -307,7 +405,6 @@ function openEditPopup(id, type) {
   if (editPopup) editPopup.style.display = 'flex';
 }
 
-// Save edit changes
 const saveEditButton = document.getElementById('saveEditButton');
 if (saveEditButton) {
   saveEditButton.addEventListener('click', () => {
@@ -335,7 +432,7 @@ if (saveEditButton) {
   });
 }
 
-// --- Drag popup function ---
+// Drag function
 function dragElement(elmnt, titleId) {
   let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
   const header = document.getElementById(titleId);
@@ -375,7 +472,24 @@ const editPopupEl = document.getElementById('editPopup');
 if (bucketPopup) dragElement(bucketPopup, 'popupTitleBar');
 if (editPopupEl) dragElement(editPopupEl, 'editTitleBar');
 
-// --- Mobile height adjustment ---
+// Lightbox close
+const lightbox = document.getElementById('lightbox');
+const closeLightboxBtn = document.querySelector('.close-lightbox');
+if (lightbox) {
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+}
+if (closeLightboxBtn) {
+  closeLightboxBtn.addEventListener('click', closeLightbox);
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && lightbox && lightbox.style.display === 'flex') {
+    closeLightbox();
+  }
+});
+
+// Mobile height
 function setMobileWindowHeight() {
   if (window.innerWidth <= 768) {
     const windowEl = document.querySelector('.window');
@@ -385,9 +499,10 @@ function setMobileWindowHeight() {
   }
 }
 
-// Initialize on load
+// Initialize
 window.addEventListener('DOMContentLoaded', () => {
   loadData();
+  setupTabs();
   setMobileWindowHeight();
 });
 
