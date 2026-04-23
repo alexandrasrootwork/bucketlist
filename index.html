@@ -10,7 +10,7 @@
 <style>
 body {
   margin: 0;
-  background: #d97bb3; /* pink desktop */
+  background: #d97bb3;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -20,8 +20,8 @@ body {
 
 /* Window Frame */
 .window {
-  width: 500px;
-  height: 600px;
+  width: 550px;
+  height: 650px;
   background: #c0c0c0;
   border: 2px solid #000;
   box-shadow: 4px 4px 0px #7a7a7a;
@@ -29,7 +29,7 @@ body {
   flex-direction: column;
 }
 
-/* Blue Title Bar */
+/* Title Bar */
 .title-bar {
   background: #000080;
   color: white;
@@ -73,6 +73,38 @@ body {
   color: #FFFFFF;
 }
 
+/* Tabs */
+.tabs {
+  display: flex;
+  background: #c0c0c0;
+  border-bottom: 1px solid #808080;
+  padding: 2px 4px 0 4px;
+  gap: 2px;
+}
+
+.tab {
+  background: #c0c0c0;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  cursor: pointer;
+  border: 1px solid #FFF;
+  border-bottom: none;
+  margin-right: 2px;
+}
+
+.tab.active {
+  background: #ffffff;
+  border: 1px solid #000;
+  border-bottom: 1px solid #ffffff;
+  margin-bottom: -1px;
+  font-weight: bold;
+}
+
+.tab:hover:not(.active) {
+  background: #d0d0d0;
+}
+
 /* Content Area */
 .content {
   background: #ffffff;
@@ -110,6 +142,7 @@ body {
   align-items: center;
   gap: 8px;
   margin-bottom: 6px;
+  flex-wrap: wrap;
 }
 
 .checkmark {
@@ -122,11 +155,30 @@ body {
   flex-grow: 1;
   font-weight: bold;
   word-break: break-word;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.item-title:hover {
+  background: #e0e0e0;
 }
 
 .item-title.completed-text {
   text-decoration: line-through;
   color: #666;
+}
+
+.item-title.editing {
+  background: #ffffcc;
+  outline: 1px solid #000;
+}
+
+.title-input {
+  flex-grow: 1;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid #808080;
 }
 
 .delete-btn {
@@ -163,6 +215,13 @@ body {
   max-width: 100%;
   max-height: 150px;
   margin-top: 5px;
+  cursor: pointer;
+  border: 1px solid #c0c0c0;
+}
+
+.item-image:hover {
+  opacity: 0.9;
+  border: 1px solid #000;
 }
 
 .edit-btn {
@@ -174,6 +233,46 @@ body {
   margin-right: 5px;
   margin-top: 5px;
   padding: 2px 5px;
+}
+
+/* Lightbox for enlarged images */
+.lightbox {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.9);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border: 3px solid #c0c0c0;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.lightbox .close-lightbox {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  color: white;
+  font-size: 40px;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  cursor: pointer;
+  background: #c0c0c0;
+  padding: 5px 15px;
+  border: 2px solid #FFF;
+  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #FFF;
+}
+
+.lightbox .close-lightbox:hover {
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #FFF;
 }
 
 /* Progress Bar */
@@ -198,7 +297,7 @@ body {
   width: 0%;
 }
 
-/* Popup (exact same style as review popup) */
+/* Popup */
 .bucket-popup {
   border: 2px solid #000;
   background: #C0C0C0;
@@ -326,13 +425,20 @@ body {
     Help
   </div>
 
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="all">📋 All Items</div>
+    <div class="tab" data-tab="completed">✅ Completed</div>
+    <div class="tab" data-tab="pending">⏳ Pending</div>
+  </div>
+
   <!-- Bucket list content -->
   <div class="content" id="bucketContainer">
-    <!-- Info Box -->
     <div class="info-box">
-      📁 <strong>Image tip:</strong> Put photos in an <strong>images/</strong> folder next to this website. Then type <strong>images/tokyo.jpg</strong> (or just <strong>tokyo.jpg</strong>) when adding images.
+      📁 <strong>Image tip:</strong> Put photos in an <strong>images/</strong> folder. Type <strong>images/tokyo.jpg</strong> (or just <strong>tokyo.jpg</strong>) when adding images.<br>
+      ✏️ <strong>Edit title:</strong> Click on any title to edit it.<br>
+      🖼️ <strong>Enlarge photo:</strong> Click any image to zoom in.
     </div>
-    <!-- Items will appear here -->
   </div>
 
   <!-- Progress Bar -->
@@ -342,6 +448,12 @@ body {
       <div class="progress-bar-fill" id="progressFill"></div>
     </div>
   </div>
+</div>
+
+<!-- Lightbox for enlarged images -->
+<div class="lightbox" id="lightbox">
+  <div class="close-lightbox">✗</div>
+  <img id="lightboxImg" src="" alt="Enlarged view">
 </div>
 
 <!-- Add Item Popup -->
