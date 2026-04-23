@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Bucket List</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="bucketlist.css?v=2">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- Main Window -->
+<div class="window">
+  <div class="title-bar">
+    📝 Bucket List
+    <div class="buttons">
+      <span>_</span>
+      <span>□</span>
+      <span>X</span>
+    </div>
+  </div>
+
+  <!-- Menu -->
+  <div class="menu">
+    File &nbsp; Edit &nbsp; View &nbsp;
+    <span class="menu-item clickable" id="openAddWindow">➕ Add Item</span> &nbsp;
+    Help
+  </div>
+
+  <!-- Bucket list content -->
+  <div class="content" id="bucketContainer">
+    <!-- Bucket items go here -->
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-section">
+    Progress: <span id="progressPercent">0</span>%
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Item Popup -->
+<div class="bucket-popup" id="bucketPopup">
+  <div class="title-bar" id="popupTitleBar">
+    Add Bucket List Item
+    <div class="buttons">
+      <span id="closePopup">X</span>
+    </div>
+  </div>
+  <div class="content">
+    <form id="bucketForm">
+      <input type="text" id="itemTitle" placeholder="What do you want to do?" required>
+      <textarea id="itemNotes" placeholder="Notes (optional)" rows="3"></textarea>
+      <input type="text" id="itemImage" placeholder="Image URL (optional)">
+      <button type="button" id="submitButton" class="retro-button">Save Item</button>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Popup -->
+<div class="bucket-popup" id="editPopup" style="display:none;">
+  <div class="title-bar" id="editTitleBar">
+    Edit Item
+    <div class="buttons">
+      <span id="closeEditPopup">X</span>
+    </div>
+  </div>
+  <div class="content">
+    <form id="editForm">
+      <textarea id="editNotes" placeholder="Your notes..." rows="4"></textarea>
+      <input type="text" id="editImage" placeholder="Image URL">
+      <input type="date" id="editDate">
+      <button type="button" id="saveEditButton" class="retro-button">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<script src="bucketlist.js"></script>
+
+</body>
+</html>
