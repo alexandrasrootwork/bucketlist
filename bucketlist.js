@@ -67,10 +67,8 @@ function render() {
   let filteredItems = [];
   
   if (currentFilter === 'completed') {
-    // Only show completed items
     filteredItems = bucketItems.filter(item => item.completed === true);
   } else {
-    // 'all' - only show incomplete/pending items
     filteredItems = bucketItems.filter(item => item.completed === false);
   }
   
@@ -243,6 +241,67 @@ function setFilter(filter) {
   render();
 }
 
+// --- EXPORT FUNCTION ---
+function exportData() {
+  const dataStr = JSON.stringify(bucketItems, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bucketlist-backup-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert('✅ Bucket list exported successfully!');
+}
+
+// --- IMPORT FUNCTION ---
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/json';
+  
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedItems = JSON.parse(event.target.result);
+        
+        // Validate the imported data
+        if (Array.isArray(importedItems)) {
+          // Check if each item has required fields
+          const valid = importedItems.every(item => 
+            item.hasOwnProperty('id') && 
+            item.hasOwnProperty('title') && 
+            item.hasOwnProperty('completed') !== undefined
+          );
+          
+          if (valid) {
+            if (confirm(`Import ${importedItems.length} items? This will replace your current bucket list.`)) {
+              bucketItems = importedItems;
+              saveData();
+              alert(`✅ Imported ${importedItems.length} items successfully!`);
+            }
+          } else {
+            alert('❌ Invalid file format. Some items missing required fields.');
+          }
+        } else {
+          alert('❌ Invalid file format. Expected an array of items.');
+        }
+      } catch (err) {
+        alert('❌ Error parsing file. Make sure it\'s a valid JSON file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  
+  input.click();
+}
+
 // Bulk Add Function
 function openBulkAddPopup() {
   const bulkHtml = `
@@ -342,6 +401,17 @@ if (bulkAddButton) {
   bulkAddButton.addEventListener('click', () => {
     openBulkAddPopup();
   });
+}
+
+// Export and Import buttons
+const exportButton = document.getElementById('exportData');
+if (exportButton) {
+  exportButton.addEventListener('click', exportData);
+}
+
+const importButton = document.getElementById('importData');
+if (importButton) {
+  importButton.addEventListener('click', importData);
 }
 
 // Filter menu clicks
