@@ -7,9 +7,9 @@ function loadData() {
   if (saved) {
     bucketItems = JSON.parse(saved);
   } else {
-    // Sample items
+    // Sample items with local image examples
     bucketItems = [
-      { id: Date.now(), title: "Visit Japan", completed: false, notes: "", image: "", completedDate: null },
+      { id: Date.now(), title: "Visit Japan", completed: false, notes: "Add image: images/japan.jpg", image: "", completedDate: null },
       { id: Date.now() + 1, title: "Learn to code", completed: true, notes: "Built this website!", image: "", completedDate: "2025-03-15" }
     ];
   }
@@ -33,6 +33,16 @@ function escapeHtml(str) {
   });
 }
 
+// Helper to fix image path
+function getImagePath(path) {
+  if (!path) return '';
+  // If path doesn't start with images/ and isn't a full URL, add images/
+  if (!path.startsWith('images/') && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
+    return 'images/' + path;
+  }
+  return path;
+}
+
 // Render all items
 function render() {
   const container = document.getElementById('bucketContainer');
@@ -49,6 +59,7 @@ function render() {
     div.className = `bucket-item ${item.completed ? 'completed' : ''}`;
     
     const completedClass = item.completed ? 'completed-text' : '';
+    const imagePath = getImagePath(item.image);
     
     div.innerHTML = `
       <div class="item-header">
@@ -59,12 +70,13 @@ function render() {
       <div class="item-details">
         ${item.completedDate ? `<div class="completed-date">✅ Completed: ${escapeHtml(item.completedDate)}</div>` : ''}
         ${item.notes ? `<div class="item-notes">📝 ${escapeHtml(item.notes)}</div>` : ''}
-        ${item.image ? `<img src="${escapeHtml(item.image)}" class="item-image" onerror="this.style.display='none'">` : ''}
+        ${item.image ? `<img src="${escapeHtml(imagePath)}" class="item-image" onerror="this.style.display='none'; this.nextSibling ? this.nextSibling.style.display='inline' : null"><span style="display:none; font-size:10px; color:#999;">⚠️ Image not found. Put ${escapeHtml(item.image)} in your images/ folder</span>` : ''}
         <div>
           <button class="edit-btn" data-id="${item.id}" data-type="notes">✏️ Edit Notes</button>
           <button class="edit-btn" data-id="${item.id}" data-type="image">🖼️ Add/Change Image</button>
           <button class="edit-btn" data-id="${item.id}" data-type="date">📅 Set Completed Date</button>
         </div>
+        ${item.image ? `<div style="font-size:9px; color:#888; margin-top:4px;">📁 ${escapeHtml(item.image)}</div>` : ''}
       </div>
     `;
     container.appendChild(div);
@@ -125,6 +137,82 @@ function deleteItem(id) {
   }
 }
 
+// --- Bulk Add Function ---
+function openBulkAddPopup() {
+  const bulkHtml = `
+    <div class="bucket-popup" id="bulkPopup" style="display:flex;">
+      <div class="title-bar" id="bulkTitleBar">
+        Bulk Add Items
+        <div class="buttons">
+          <span id="closeBulkPopup">X</span>
+        </div>
+      </div>
+      <div class="content">
+        <p style="font-size:11px; margin-bottom:8px;">Enter one item per line:</p>
+        <textarea id="bulkItems" placeholder="Visit Japan&#10;Learn French&#10;Run a marathon&#10;Write a book" rows="8" style="width:100%; box-sizing:border-box;"></textarea>
+        <p style="font-size:10px; color:#555; margin-top:5px;">Tip: Add notes with a pipe | like "Visit Japan | Cherry blossoms in spring"</p>
+        <button type="button" id="confirmBulkButton" class="retro-button">Add All Items</button>
+      </div>
+    </div>
+  `;
+  
+  const existing = document.getElementById('bulkPopup');
+  if (existing) existing.remove();
+  
+  document.body.insertAdjacentHTML('beforeend', bulkHtml);
+  
+  const bulkPopup = document.getElementById('bulkPopup');
+  const closeBtn = document.getElementById('closeBulkPopup');
+  const confirmBtn = document.getElementById('confirmBulkButton');
+  const textarea = document.getElementById('bulkItems');
+  
+  dragElement(bulkPopup, 'bulkTitleBar');
+  
+  closeBtn.addEventListener('click', () => {
+    bulkPopup.remove();
+  });
+  
+  confirmBtn.addEventListener('click', () => {
+    const rawText = textarea.value;
+    const lines = rawText.split(/\r?\n/);
+    let addedCount = 0;
+    
+    lines.forEach(line => {
+      line = line.trim();
+      if (line === '') return;
+      
+      let title = line;
+      let notes = '';
+      
+      if (line.includes('|')) {
+        const parts = line.split('|');
+        title = parts[0].trim();
+        notes = parts.slice(1).join('|').trim();
+      }
+      
+      const newItem = {
+        id: Date.now() + addedCount,
+        title: title,
+        completed: false,
+        notes: notes,
+        image: '',
+        completedDate: null
+      };
+      
+      bucketItems.push(newItem);
+      addedCount++;
+    });
+    
+    if (addedCount > 0) {
+      saveData();
+      alert(`Added ${addedCount} item(s)!`);
+      bulkPopup.remove();
+    } else {
+      alert('No valid items found. Enter one item per line.');
+    }
+  });
+}
+
 // --- Popup management ---
 const popup = document.getElementById('bucketPopup');
 const editPopup = document.getElementById('editPopup');
@@ -141,6 +229,14 @@ if (openAddButton) {
     if (notesInput) notesInput.value = '';
     if (imageInput) imageInput.value = '';
     if (popup) popup.style.display = 'flex';
+  });
+}
+
+// Bulk add button
+const bulkAddButton = document.getElementById('bulkAddWindow');
+if (bulkAddButton) {
+  bulkAddButton.addEventListener('click', () => {
+    openBulkAddPopup();
   });
 }
 
@@ -203,6 +299,11 @@ function openEditPopup(id, type) {
   if (editImage) editImage.value = item.image || '';
   if (editDate) editDate.value = item.completedDate || '';
   
+  // Add helpful placeholder text for images
+  if (editImage) {
+    editImage.placeholder = 'images/filename.jpg (or just filename.jpg)';
+  }
+  
   if (editPopup) editPopup.style.display = 'flex';
 }
 
@@ -234,7 +335,7 @@ if (saveEditButton) {
   });
 }
 
-// --- Drag popup function (from your original) ---
+// --- Drag popup function ---
 function dragElement(elmnt, titleId) {
   let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
   const header = document.getElementById(titleId);
@@ -274,7 +375,7 @@ const editPopupEl = document.getElementById('editPopup');
 if (bucketPopup) dragElement(bucketPopup, 'popupTitleBar');
 if (editPopupEl) dragElement(editPopupEl, 'editTitleBar');
 
-// --- Mobile height adjustment (from your original) ---
+// --- Mobile height adjustment ---
 function setMobileWindowHeight() {
   if (window.innerWidth <= 768) {
     const windowEl = document.querySelector('.window');
