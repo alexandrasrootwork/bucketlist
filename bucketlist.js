@@ -1,6 +1,6 @@
 // --- Data storage (localStorage) ---
 let bucketItems = [];
-let currentFilter = 'all'; // 'all', 'pending', 'completed'
+let currentFilter = 'all'; // 'all' (pending only) or 'completed'
 
 // Load from localStorage
 function loadData() {
@@ -64,17 +64,14 @@ function render() {
   container.innerHTML = '';
   if (infoBox) container.appendChild(infoBox);
   
-  let filteredItems = [...bucketItems];
+  let filteredItems = [];
   
   if (currentFilter === 'completed') {
-    filteredItems = bucketItems.filter(item => item.completed);
-  } else if (currentFilter === 'pending') {
-    filteredItems = bucketItems.filter(item => !item.completed);
+    // Only show completed items
+    filteredItems = bucketItems.filter(item => item.completed === true);
   } else {
-    // 'all' - show incomplete first, then completed
-    const incomplete = bucketItems.filter(item => !item.completed);
-    const complete = bucketItems.filter(item => item.completed);
-    filteredItems = [...incomplete, ...complete];
+    // 'all' - only show incomplete/pending items
+    filteredItems = bucketItems.filter(item => item.completed === false);
   }
   
   if (filteredItems.length === 0) {
@@ -82,9 +79,7 @@ function render() {
     emptyMsg.style.padding = '20px';
     emptyMsg.style.textAlign = 'center';
     emptyMsg.style.color = '#999';
-    emptyMsg.innerHTML = currentFilter === 'completed' ? '✅ No completed items yet!' : 
-                         currentFilter === 'pending' ? '⏳ Nothing pending — you\'re done!' : 
-                         '📝 Add your first bucket list item!';
+    emptyMsg.innerHTML = currentFilter === 'completed' ? '✅ No completed items yet!' : '📝 No pending items — add something to your bucket list!';
     container.appendChild(emptyMsg);
   }
   
@@ -351,11 +346,9 @@ if (bulkAddButton) {
 
 // Filter menu clicks
 const filterAll = document.getElementById('filterAll');
-const filterPending = document.getElementById('filterPending');
 const filterCompleted = document.getElementById('filterCompleted');
 
 if (filterAll) filterAll.addEventListener('click', () => setFilter('all'));
-if (filterPending) filterPending.addEventListener('click', () => setFilter('pending'));
 if (filterCompleted) filterCompleted.addEventListener('click', () => setFilter('completed'));
 
 const closePopup = document.getElementById('closePopup');
