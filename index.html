@@ -83,6 +83,16 @@ body {
   line-height: 1.4;
 }
 
+/* Info Box */
+.info-box {
+  background: #ffffcc;
+  padding: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #c0c0c0;
+  font-size: 10px;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+}
+
 /* Bucket Item Styles */
 .bucket-item {
   margin-bottom: 18px;
@@ -312,11 +322,16 @@ body {
   <div class="menu">
     File &nbsp; Edit &nbsp; View &nbsp;
     <span class="menu-item clickable" id="openAddWindow">➕ Add Item</span> &nbsp;
+    <span class="menu-item clickable" id="bulkAddWindow">📋 Bulk Add</span> &nbsp;
     Help
   </div>
 
   <!-- Bucket list content -->
   <div class="content" id="bucketContainer">
+    <!-- Info Box -->
+    <div class="info-box">
+      📁 <strong>Image tip:</strong> Put photos in an <strong>images/</strong> folder next to this website. Then type <strong>images/tokyo.jpg</strong> (or just <strong>tokyo.jpg</strong>) when adding images.
+    </div>
     <!-- Items will appear here -->
   </div>
 
@@ -341,7 +356,7 @@ body {
     <form id="bucketForm">
       <textarea id="itemTitle" placeholder="What do you want to do?" rows="2" required></textarea>
       <textarea id="itemNotes" placeholder="Notes (optional)" rows="3"></textarea>
-      <input type="text" id="itemImage" placeholder="Image URL (optional)">
+      <input type="text" id="itemImage" placeholder="images/filename.jpg (or just filename.jpg)">
       <button type="button" id="submitButton" class="retro-button">Save Item</button>
     </form>
   </div>
@@ -358,7 +373,7 @@ body {
   <div class="content">
     <form id="editForm">
       <textarea id="editNotes" placeholder="Your notes..." rows="4"></textarea>
-      <input type="text" id="editImage" placeholder="Image URL">
+      <input type="text" id="editImage" placeholder="images/filename.jpg (or just filename.jpg)">
       <input type="date" id="editDate">
       <button type="button" id="saveEditButton" class="retro-button">Save Changes</button>
     </form>
