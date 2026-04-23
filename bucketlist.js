@@ -1,6 +1,6 @@
 // --- Data storage (localStorage) ---
 let bucketItems = [];
-let currentFilter = 'all'; // 'all', 'completed', 'pending'
+let currentFilter = 'all'; // 'all', 'pending', 'completed'
 
 // Load from localStorage
 function loadData() {
@@ -14,12 +14,24 @@ function loadData() {
     ];
   }
   render();
+  updateFilterActiveState();
 }
 
 // Save to localStorage
 function saveData() {
   localStorage.setItem('bucketList', JSON.stringify(bucketItems));
   render();
+}
+
+// Update which filter menu item looks active
+function updateFilterActiveState() {
+  document.querySelectorAll('.filter-option').forEach(el => {
+    if (el.dataset.filter === currentFilter) {
+      el.classList.add('filter-active');
+    } else {
+      el.classList.remove('filter-active');
+    }
+  });
 }
 
 // Escape HTML
@@ -196,7 +208,7 @@ function startEditTitle(id, titleSpan) {
     }
     input.remove();
     titleSpan.style.display = '';
-    render(); // Re-render to refresh
+    render();
   }
   
   input.addEventListener('blur', saveEdit);
@@ -229,17 +241,11 @@ function deleteItem(id) {
   }
 }
 
-// Tab switching
-function setupTabs() {
-  const tabs = document.querySelectorAll('.tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentFilter = tab.dataset.tab;
-      render();
-    });
-  });
+// Set filter and re-render
+function setFilter(filter) {
+  currentFilter = filter;
+  updateFilterActiveState();
+  render();
 }
 
 // Bulk Add Function
@@ -342,6 +348,15 @@ if (bulkAddButton) {
     openBulkAddPopup();
   });
 }
+
+// Filter menu clicks
+const filterAll = document.getElementById('filterAll');
+const filterPending = document.getElementById('filterPending');
+const filterCompleted = document.getElementById('filterCompleted');
+
+if (filterAll) filterAll.addEventListener('click', () => setFilter('all'));
+if (filterPending) filterPending.addEventListener('click', () => setFilter('pending'));
+if (filterCompleted) filterCompleted.addEventListener('click', () => setFilter('completed'));
 
 const closePopup = document.getElementById('closePopup');
 if (closePopup) {
@@ -502,7 +517,6 @@ function setMobileWindowHeight() {
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
   loadData();
-  setupTabs();
   setMobileWindowHeight();
 });
 
