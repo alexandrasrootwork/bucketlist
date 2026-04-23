@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Bucket List</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<link rel="stylesheet" href="bucketlist.css?v=5">
+<link rel="stylesheet" href="bucketlist.css?v=6">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
@@ -24,10 +25,8 @@ body {
 
 /* Window Frame */
 .window {
-  width: 100%;
-  max-width: 700px;
-  height: 100%;
-  max-height: 700px;
+  width: 550px;
+  height: 650px;
   background: #c0c0c0;
   border: 2px solid #000;
   box-shadow: 4px 4px 0px #7a7a7a;
@@ -63,7 +62,7 @@ body {
   cursor: default;
 }
 
-/* Menu Bar - Scrollable on mobile */
+/* Menu Bar - STATIC (no scrolling) */
 .menu {
   background: #c0c0c0;
   padding: 4px 8px;
@@ -72,7 +71,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   position: relative;
   z-index: 10;
   flex-shrink: 0;
@@ -81,7 +80,7 @@ body {
 .menu-item {
   cursor: pointer;
   color: #0000AA;
-  padding: 4px 6px;
+  padding: 4px 8px;
   display: inline-block;
   white-space: nowrap;
 }
@@ -110,7 +109,7 @@ body {
 
 .dropdown-toggle {
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 4px 8px;
   color: #0000AA;
   white-space: nowrap;
 }
@@ -478,7 +477,7 @@ body {
   color: #FFFFFF;
 }
 
-/* Mobile Styles */
+/* Mobile Styles - STATIC menu */
 @media (max-width: 768px) {
   .window {
     position: fixed !important;
@@ -497,44 +496,34 @@ body {
     height: 100%;
   }
   
-  /* Make menu scrollable horizontally */
+  /* Static menu - no scrolling, just wrap */
   .menu {
-    overflow-x: auto;
-    white-space: nowrap;
-    flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-    padding: 4px 8px;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 4px 6px;
   }
   
   .menu-item, .dropdown-toggle {
-    font-size: 11px;
-    padding: 6px 8px;
-    display: inline-block;
+    font-size: 10px;
+    padding: 4px 6px;
   }
   
   .menu-divider {
     display: inline-block;
-    margin: 0 2px;
   }
   
-  .dropdown {
-    display: inline-block;
-  }
-  
-  /* Dropdown stays on right side, not middle */
   .dropdown-content {
     position: absolute;
     top: 100%;
     right: 0;
     left: auto;
-    min-width: 150px;
-    max-width: 200px;
+    min-width: 140px;
   }
   
   .dropdown-content .menu-item {
     white-space: nowrap;
-    padding: 10px 12px;
+    padding: 8px 12px;
+    font-size: 11px;
   }
   
   .bucket-popup {
@@ -562,7 +551,7 @@ body {
     </div>
   </div>
 
-  <!-- Menu Bar - Horizontally scrollable on mobile -->
+  <!-- Menu Bar - STATIC (no scrolling) -->
   <div class="menu">
     <span class="menu-item clickable" id="openAddWindow">➕ Add</span>
     <span class="menu-divider">|</span>
@@ -572,13 +561,12 @@ body {
     <span class="menu-divider">|</span>
     <span class="menu-item clickable filter-option" data-filter="completed" id="filterCompleted">✅ Done</span>
     <span class="menu-divider">|</span>
-    <span class="menu-item clickable" id="randomItem">🎲 Random</span>
-    <span class="menu-divider">|</span>
     <div class="dropdown" id="helpDropdown">
       <span class="dropdown-toggle" id="helpToggle">❓ Help ▼</span>
       <div class="dropdown-content" id="helpDropdownContent">
-        <span class="menu-item clickable" id="exportData">💾 Export Backup</span>
-        <span class="menu-item clickable" id="importData">📂 Import Backup</span>
+        <span class="menu-item clickable" id="randomItem">🎲 Random</span>
+        <span class="menu-item clickable" id="exportData">💾 Export</span>
+        <span class="menu-item clickable" id="importData">📂 Import</span>
         <span class="menu-item clickable" id="howToUse">📖 How to Use</span>
       </div>
     </div>
@@ -589,7 +577,7 @@ body {
     <div class="info-box">
       📁 <strong>Images:</strong> Put photos in an <strong>images/</strong> folder. Type <strong>images/photo.jpg</strong><br>
       ✏️ <strong>Edit:</strong> Click any title to edit it. Tap images to enlarge.<br>
-      🎲 <strong>Random:</strong> Get a random suggestion from your pending list!
+      🎲 <strong>Random:</strong> Under Help menu — get a random suggestion from your pending list!
     </div>
   </div>
 
@@ -673,7 +661,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (dropdownContent.classList.contains('show')) {
         dropdownContent.classList.remove('show');
       } else {
-        // Close any other open dropdowns
         document.querySelectorAll('.dropdown-content.show').forEach(function(drop) {
           drop.classList.remove('show');
         });
@@ -681,14 +668,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     
-    // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
       if (!helpToggle.contains(e.target) && !dropdownContent.contains(e.target)) {
         dropdownContent.classList.remove('show');
       }
     });
     
-    // Close dropdown when tapping an option
     dropdownContent.querySelectorAll('.menu-item').forEach(function(item) {
       item.addEventListener('click', function() {
         dropdownContent.classList.remove('show');
