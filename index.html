@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Bucket List</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<link rel="stylesheet" href="bucketlist.css?v=3">
+<link rel="stylesheet" href="bucketlist.css?v=4">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
@@ -27,6 +27,7 @@ body {
   box-shadow: 4px 4px 0px #7a7a7a;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 /* Title Bar */
@@ -65,6 +66,7 @@ body {
   flex-wrap: wrap;
   gap: 4px;
   position: relative;
+  z-index: 10;
 }
 
 .menu-item {
@@ -91,7 +93,7 @@ body {
   line-height: 22px;
 }
 
-/* Dropdown Menu - Mobile Friendly */
+/* Dropdown Menu - Mobile Friendly with HIGH z-index */
 .dropdown {
   position: relative;
   display: inline-block;
@@ -113,36 +115,48 @@ body {
   display: none;
   position: absolute;
   top: 100%;
-  left: 0;
+  left: auto;
+  right: 0;
   background-color: #c0c0c0;
-  min-width: 140px;
-  box-shadow: 2px 2px 0px #7a7a7a;
-  border: 1px solid #000;
-  z-index: 1000;
+  min-width: 160px;
+  box-shadow: 2px 2px 0px #000000;
+  border: 2px solid #000;
+  z-index: 10000;
   margin-top: 2px;
 }
 
 .dropdown-content .menu-item {
   display: block;
-  padding: 6px 12px;
+  padding: 8px 12px;
   white-space: nowrap;
+  border-bottom: 1px solid #808080;
+}
+
+.dropdown-content .menu-item:last-child {
+  border-bottom: none;
 }
 
 .dropdown-content.show {
   display: block;
 }
 
-/* For mobile, make dropdown position better */
+/* For mobile, make dropdown full width and easy to tap */
 @media (max-width: 768px) {
   .dropdown-content {
     position: fixed;
     top: auto;
-    left: auto;
+    bottom: auto;
+    left: 10px;
     right: 10px;
-    min-width: 160px;
+    width: auto;
+    max-width: calc(100% - 20px);
+    min-width: unset;
   }
-  .menu-item {
+  .dropdown-content .menu-item {
     white-space: normal;
+    text-align: center;
+    padding: 12px;
+    font-size: 14px;
   }
 }
 
@@ -155,6 +169,8 @@ body {
   font-size: 13px;
   line-height: 1.4;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1;
 }
 
 /* Info Box */
@@ -293,7 +309,7 @@ body {
   width: 350px;
   max-width: 90%;
   padding: 0;
-  z-index: 1000;
+  z-index: 10001;
   box-shadow: 4px 4px 0 #7a7a7a;
   flex-direction: column;
 }
@@ -330,7 +346,7 @@ body {
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.9);
-  z-index: 2000;
+  z-index: 20000;
   justify-content: center;
   align-items: center;
   cursor: pointer;
@@ -368,6 +384,8 @@ body {
   border-top: 1px solid #808080;
   font-size: 11px;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  position: relative;
+  z-index: 1;
 }
 
 .progress-bar-bg {
@@ -396,7 +414,7 @@ body {
   min-width: 300px;
   max-width: 90%;
   padding: 0;
-  z-index: 1000;
+  z-index: 10001;
   box-shadow: 4px 4px 0 #7a7a7a;
   flex-direction: column;
   max-height: 90%;
@@ -494,11 +512,14 @@ body {
   }
   .menu-item, .dropdown-toggle {
     font-size: 11px;
-    padding: 4px 8px;
+    padding: 6px 8px;
   }
   .bucket-popup {
     width: 95%;
     max-height: 80%;
+  }
+  .random-popup {
+    width: 90%;
   }
 }
 </style>
@@ -613,35 +634,49 @@ body {
 <script src="bucketlist.js"></script>
 
 <script>
-// Mobile dropdown toggle - Add this to make dropdown work on mobile
+// Mobile dropdown toggle - Fixed to be above everything
 document.addEventListener('DOMContentLoaded', function() {
   const helpToggle = document.getElementById('helpToggle');
   const dropdownContent = document.getElementById('helpDropdownContent');
+  let isOpen = false;
   
   if (helpToggle && dropdownContent) {
     helpToggle.addEventListener('click', function(e) {
       e.stopPropagation();
-      // Close any other open dropdowns
-      document.querySelectorAll('.dropdown-content.show').forEach(function(drop) {
-        if (drop !== dropdownContent) {
+      e.preventDefault();
+      
+      if (dropdownContent.classList.contains('show')) {
+        dropdownContent.classList.remove('show');
+        isOpen = false;
+      } else {
+        // Close any other open dropdowns
+        document.querySelectorAll('.dropdown-content.show').forEach(function(drop) {
           drop.classList.remove('show');
-        }
-      });
-      dropdownContent.classList.toggle('show');
+        });
+        dropdownContent.classList.add('show');
+        isOpen = true;
+      }
     });
     
     // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
       if (!helpToggle.contains(e.target) && !dropdownContent.contains(e.target)) {
         dropdownContent.classList.remove('show');
+        isOpen = false;
       }
     });
     
-    // Close dropdown when clicking an option
+    // Close dropdown when tapping an option
     dropdownContent.querySelectorAll('.menu-item').forEach(function(item) {
       item.addEventListener('click', function() {
         dropdownContent.classList.remove('show');
+        isOpen = false;
       });
+    });
+    
+    // Prevent scroll when dropdown is open on mobile
+    dropdownContent.addEventListener('touchmove', function(e) {
+      e.stopPropagation();
     });
   }
 });
