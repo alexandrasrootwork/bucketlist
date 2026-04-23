@@ -22,23 +22,34 @@ function saveData() {
   render();
 }
 
+// Escape HTML to prevent XSS
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
 // Render all items
 function render() {
   const container = document.getElementById('bucketContainer');
   if (!container) return;
-
+  
   container.innerHTML = '';
-
+  
   const incomplete = bucketItems.filter(item => !item.completed);
   const complete = bucketItems.filter(item => item.completed);
   const sorted = [...incomplete, ...complete];
-
+  
   sorted.forEach(item => {
     const div = document.createElement('div');
     div.className = `bucket-item ${item.completed ? 'completed' : ''}`;
-
+    
     const completedClass = item.completed ? 'completed-text' : '';
-
+    
     div.innerHTML = `
       <div class="item-header">
         <input type="checkbox" class="checkmark" data-id="${item.id}" ${item.completed ? 'checked' : ''}>
@@ -46,7 +57,7 @@ function render() {
         <button class="delete-btn" data-id="${item.id}">✗</button>
       </div>
       <div class="item-details">
-        ${item.completedDate ? `<div class="completed-date">✅ Completed: ${item.completedDate}</div>` : ''}
+        ${item.completedDate ? `<div class="completed-date">✅ Completed: ${escapeHtml(item.completedDate)}</div>` : ''}
         ${item.notes ? `<div class="item-notes">📝 ${escapeHtml(item.notes)}</div>` : ''}
         ${item.image ? `<img src="${escapeHtml(item.image)}" class="item-image" onerror="this.style.display='none'">` : ''}
         <div>
@@ -58,14 +69,16 @@ function render() {
     `;
     container.appendChild(div);
   });
-
+  
   // Update progress
   const total = bucketItems.length;
   const completedCount = bucketItems.filter(i => i.completed).length;
   const percent = total === 0 ? 0 : Math.round((completedCount / total) * 100);
-  document.getElementById('progressPercent').innerText = percent;
-  document.getElementById('progressFill').style.width = percent + '%';
-
+  const progressPercent = document.getElementById('progressPercent');
+  const progressFill = document.getElementById('progressFill');
+  if (progressPercent) progressPercent.innerText = percent;
+  if (progressFill) progressFill.style.width = percent + '%';
+  
   // Attach event listeners
   document.querySelectorAll('.checkmark').forEach(cb => {
     cb.addEventListener('change', (e) => {
@@ -73,31 +86,20 @@ function render() {
       toggleComplete(id);
     });
   });
-
+  
   document.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const id = parseInt(e.target.dataset.id);
       deleteItem(id);
     });
   });
-
+  
   document.querySelectorAll('.edit-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const id = parseInt(e.target.dataset.id);
       const type = e.target.dataset.type;
       openEditPopup(id, type);
     });
-  });
-}
-
-// Helper to escape HTML
-function escapeHtml(str) {
-  if (!str) return '';
-  return str.replace(/[&<>]/g, function(m) {
-    if (m === '&') return '&amp;';
-    if (m === '<') return '&lt;';
-    if (m === '>') return '&gt;';
-    return m;
   });
 }
 
@@ -127,80 +129,113 @@ function deleteItem(id) {
 const popup = document.getElementById('bucketPopup');
 const editPopup = document.getElementById('editPopup');
 let currentEditId = null;
-let currentEditType = null;
 
-document.getElementById('openAddWindow').addEventListener('click', () => {
-  document.getElementById('itemTitle').value = '';
-  document.getElementById('itemNotes').value = '';
-  document.getElementById('itemImage').value = '';
-  popup.style.display = 'flex';
-});
+// Open add popup
+const openAddButton = document.getElementById('openAddWindow');
+if (openAddButton) {
+  openAddButton.addEventListener('click', () => {
+    const titleInput = document.getElementById('itemTitle');
+    const notesInput = document.getElementById('itemNotes');
+    const imageInput = document.getElementById('itemImage');
+    if (titleInput) titleInput.value = '';
+    if (notesInput) notesInput.value = '';
+    if (imageInput) imageInput.value = '';
+    if (popup) popup.style.display = 'flex';
+  });
+}
 
-document.getElementById('closePopup').addEventListener('click', () => {
-  popup.style.display = 'none';
-});
+// Close add popup
+const closePopup = document.getElementById('closePopup');
+if (closePopup) {
+  closePopup.addEventListener('click', () => {
+    if (popup) popup.style.display = 'none';
+  });
+}
 
-document.getElementById('closeEditPopup').addEventListener('click', () => {
-  editPopup.style.display = 'none';
-});
+// Close edit popup
+const closeEditPopup = document.getElementById('closeEditPopup');
+if (closeEditPopup) {
+  closeEditPopup.addEventListener('click', () => {
+    if (editPopup) editPopup.style.display = 'none';
+  });
+}
 
 // Submit new item
-document.getElementById('submitButton').addEventListener('click', () => {
-  const title = document.getElementById('itemTitle').value.trim();
-  if (!title) {
-    alert('Please enter a title!');
-    return;
-  }
-
-  const newItem = {
-    id: Date.now(),
-    title: title,
-    completed: false,
-    notes: document.getElementById('itemNotes').value.trim(),
-    image: document.getElementById('itemImage').value.trim(),
-    completedDate: null
-  };
-
-  bucketItems.push(newItem);
-  saveData();
-  popup.style.display = 'none';
-});
+const submitButton = document.getElementById('submitButton');
+if (submitButton) {
+  submitButton.addEventListener('click', () => {
+    const titleInput = document.getElementById('itemTitle');
+    const title = titleInput ? titleInput.value.trim() : '';
+    if (!title) {
+      alert('Please enter a title!');
+      return;
+    }
+    
+    const notesInput = document.getElementById('itemNotes');
+    const imageInput = document.getElementById('itemImage');
+    
+    const newItem = {
+      id: Date.now(),
+      title: title,
+      completed: false,
+      notes: notesInput ? notesInput.value.trim() : '',
+      image: imageInput ? imageInput.value.trim() : '',
+      completedDate: null
+    };
+    
+    bucketItems.push(newItem);
+    saveData();
+    if (popup) popup.style.display = 'none';
+  });
+}
 
 // Open edit popup
 function openEditPopup(id, type) {
   currentEditId = id;
-  currentEditType = type;
   const item = bucketItems.find(i => i.id === id);
   if (!item) return;
-
-  document.getElementById('editNotes').value = item.notes || '';
-  document.getElementById('editImage').value = item.image || '';
-  document.getElementById('editDate').value = item.completedDate || '';
-  editPopup.style.display = 'flex';
+  
+  const editNotes = document.getElementById('editNotes');
+  const editImage = document.getElementById('editImage');
+  const editDate = document.getElementById('editDate');
+  
+  if (editNotes) editNotes.value = item.notes || '';
+  if (editImage) editImage.value = item.image || '';
+  if (editDate) editDate.value = item.completedDate || '';
+  
+  if (editPopup) editPopup.style.display = 'flex';
 }
 
 // Save edit changes
-document.getElementById('saveEditButton').addEventListener('click', () => {
-  const item = bucketItems.find(i => i.id === currentEditId);
-  if (item) {
-    item.notes = document.getElementById('editNotes').value.trim();
-    item.image = document.getElementById('editImage').value.trim();
-    const newDate = document.getElementById('editDate').value;
-    if (newDate && item.completed) {
-      item.completedDate = newDate;
-    } else if (newDate && !item.completed) {
-      if (confirm('Setting a completed date will mark this as completed. Continue?')) {
-        item.completed = true;
+const saveEditButton = document.getElementById('saveEditButton');
+if (saveEditButton) {
+  saveEditButton.addEventListener('click', () => {
+    const item = bucketItems.find(i => i.id === currentEditId);
+    if (item) {
+      const editNotes = document.getElementById('editNotes');
+      const editImage = document.getElementById('editImage');
+      const editDate = document.getElementById('editDate');
+      
+      item.notes = editNotes ? editNotes.value.trim() : '';
+      item.image = editImage ? editImage.value.trim() : '';
+      const newDate = editDate ? editDate.value : '';
+      
+      if (newDate && item.completed) {
         item.completedDate = newDate;
+      } else if (newDate && !item.completed) {
+        if (confirm('Setting a completed date will mark this as completed. Continue?')) {
+          item.completed = true;
+          item.completedDate = newDate;
+        }
       }
+      saveData();
     }
-    saveData();
-  }
-  editPopup.style.display = 'none';
-});
+    if (editPopup) editPopup.style.display = 'none';
+  });
+}
 
-// --- Drag popup ---
-function makeDraggable(elmnt, titleId) {
+// --- Drag popup function (from your original) ---
+function dragElement(elmnt, titleId) {
   let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
   const header = document.getElementById(titleId);
   if (header) {
@@ -233,14 +268,19 @@ function makeDraggable(elmnt, titleId) {
   }
 }
 
-makeDraggable(document.getElementById('bucketPopup'), 'popupTitleBar');
-makeDraggable(document.getElementById('editPopup'), 'editTitleBar');
+// Make popups draggable
+const bucketPopup = document.getElementById('bucketPopup');
+const editPopupEl = document.getElementById('editPopup');
+if (bucketPopup) dragElement(bucketPopup, 'popupTitleBar');
+if (editPopupEl) dragElement(editPopupEl, 'editTitleBar');
 
-// Mobile height adjustment
+// --- Mobile height adjustment (from your original) ---
 function setMobileWindowHeight() {
   if (window.innerWidth <= 768) {
     const windowEl = document.querySelector('.window');
-    if (windowEl) windowEl.style.height = window.innerHeight + 'px';
+    if (windowEl) {
+      windowEl.style.height = window.innerHeight + 'px';
+    }
   }
 }
 
