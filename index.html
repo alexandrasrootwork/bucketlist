@@ -82,11 +82,6 @@ body {
   margin: 0 4px;
 }
 
-.menu-section {
-  display: inline-flex;
-  align-items: center;
-}
-
 /* Content Area */
 .content {
   background: #ffffff;
@@ -400,13 +395,12 @@ body {
     </div>
   </div>
 
-  <!-- Menu Bar with Filters -->
+  <!-- Menu Bar with Filters (Pending removed) -->
   <div class="menu">
     <span class="menu-item clickable" id="openAddWindow">➕ Add Item</span>
     <span class="menu-item clickable" id="bulkAddWindow">📋 Bulk Add</span>
     <span class="menu-divider">|</span>
     <span class="menu-item clickable filter-option" data-filter="all" id="filterAll">📋 All</span>
-    <span class="menu-item clickable filter-option" data-filter="pending" id="filterPending">⏳ Pending</span>
     <span class="menu-item clickable filter-option" data-filter="completed" id="filterCompleted">✅ Completed</span>
     <span class="menu-divider">|</span>
     <span class="menu-item">Help</span>
@@ -418,7 +412,7 @@ body {
       📁 <strong>Image tip:</strong> Put photos in an <strong>images/</strong> folder. Type <strong>images/tokyo.jpg</strong> (or just <strong>tokyo.jpg</strong>) when adding images.<br>
       ✏️ <strong>Edit title:</strong> Click on any title to edit it.<br>
       🖼️ <strong>Enlarge photo:</strong> Click any image to zoom in.<br>
-      🔍 <strong>Filter:</strong> Use the menu above to show All, Pending, or Completed items.
+      🔍 <strong>Filter:</strong> "All" shows pending items only. "Completed" shows finished items.
     </div>
   </div>
 
