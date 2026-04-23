@@ -20,7 +20,7 @@ body {
 
 /* Window Frame */
 .window {
-  width: 550px;
+  width: 600px;
   height: 650px;
   background: #c0c0c0;
   border: 2px solid #000;
@@ -395,13 +395,16 @@ body {
     </div>
   </div>
 
-  <!-- Menu Bar with Filters (Pending removed) -->
+  <!-- Menu Bar with Export and Import -->
   <div class="menu">
     <span class="menu-item clickable" id="openAddWindow">➕ Add Item</span>
     <span class="menu-item clickable" id="bulkAddWindow">📋 Bulk Add</span>
     <span class="menu-divider">|</span>
     <span class="menu-item clickable filter-option" data-filter="all" id="filterAll">📋 All</span>
     <span class="menu-item clickable filter-option" data-filter="completed" id="filterCompleted">✅ Completed</span>
+    <span class="menu-divider">|</span>
+    <span class="menu-item clickable" id="exportData">💾 Export</span>
+    <span class="menu-item clickable" id="importData">📂 Import</span>
     <span class="menu-divider">|</span>
     <span class="menu-item">Help</span>
   </div>
@@ -412,7 +415,8 @@ body {
       📁 <strong>Image tip:</strong> Put photos in an <strong>images/</strong> folder. Type <strong>images/tokyo.jpg</strong> (or just <strong>tokyo.jpg</strong>) when adding images.<br>
       ✏️ <strong>Edit title:</strong> Click on any title to edit it.<br>
       🖼️ <strong>Enlarge photo:</strong> Click any image to zoom in.<br>
-      🔍 <strong>Filter:</strong> "All" shows pending items only. "Completed" shows finished items.
+      🔍 <strong>Filter:</strong> "All" shows pending items only. "Completed" shows finished items.<br>
+      💾 <strong>Backup:</strong> Use Export/Import to save or transfer your bucket list.
     </div>
   </div>
 
