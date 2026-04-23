@@ -13,7 +13,7 @@
 <!-- Main Window -->
 <div class="window">
   <div class="title-bar">
-    📝 Bucket List
+    Bucket List
     <div class="buttons">
       <span>_</span>
       <span>□</span>
@@ -24,13 +24,13 @@
   <!-- Menu -->
   <div class="menu">
     File &nbsp; Edit &nbsp; View &nbsp;
-    <span class="menu-item clickable" id="openAddWindow">➕ Add Item</span> &nbsp;
+    <span class="menu-item clickable" id="openAddWindow">Add Item</span> &nbsp;
     Help
   </div>
 
   <!-- Bucket list content -->
   <div class="content" id="bucketContainer">
-    <!-- Bucket items go here -->
+    <!-- Items go here -->
   </div>
 
   <!-- Progress bar -->
@@ -52,7 +52,7 @@
   </div>
   <div class="content">
     <form id="bucketForm">
-      <input type="text" id="itemTitle" placeholder="What do you want to do?" required>
+      <textarea id="itemTitle" placeholder="What do you want to do?" rows="2" required></textarea>
       <textarea id="itemNotes" placeholder="Notes (optional)" rows="3"></textarea>
       <input type="text" id="itemImage" placeholder="Image URL (optional)">
       <button type="button" id="submitButton" class="retro-button">Save Item</button>
@@ -82,3 +82,10 @@
 
 </body>
 </html>
+---
+
+## **bucketlist.js** (same as before, works with the new CSS)
+
+Use the same JavaScript from my previous reply — it works perfectly with this corrected CSS.
+
+Now the styling will look **exactly like your client reviews site** — same pink background, same Windows 95 window frame, same retro buttons and popups.
