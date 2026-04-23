@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Bucket List</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="bucketlist.css?v=2">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="stylesheet" href="bucketlist.css?v=3">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
@@ -70,8 +70,9 @@ body {
 .menu-item {
   cursor: pointer;
   color: #0000AA;
-  padding: 0 4px;
-  position: relative;
+  padding: 4px 6px;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .menu-item.clickable:hover {
@@ -79,15 +80,33 @@ body {
   color: #FFFFFF;
 }
 
+.menu-item.clickable:active {
+  background-color: #000080;
+  color: #FFFFFF;
+}
+
 .menu-divider {
   color: #808080;
   margin: 0 4px;
+  line-height: 22px;
 }
 
-/* Dropdown Menu */
+/* Dropdown Menu - Mobile Friendly */
 .dropdown {
   position: relative;
   display: inline-block;
+}
+
+.dropdown-toggle {
+  cursor: pointer;
+  padding: 4px 6px;
+  color: #0000AA;
+  white-space: nowrap;
+}
+
+.dropdown-toggle:hover, .dropdown-toggle.active {
+  background-color: #000080;
+  color: #FFFFFF;
 }
 
 .dropdown-content {
@@ -96,21 +115,35 @@ body {
   top: 100%;
   left: 0;
   background-color: #c0c0c0;
-  min-width: 120px;
+  min-width: 140px;
   box-shadow: 2px 2px 0px #7a7a7a;
   border: 1px solid #000;
-  z-index: 100;
+  z-index: 1000;
   margin-top: 2px;
 }
 
 .dropdown-content .menu-item {
   display: block;
-  padding: 4px 8px;
+  padding: 6px 12px;
   white-space: nowrap;
 }
 
-.dropdown:hover .dropdown-content {
+.dropdown-content.show {
   display: block;
+}
+
+/* For mobile, make dropdown position better */
+@media (max-width: 768px) {
+  .dropdown-content {
+    position: fixed;
+    top: auto;
+    left: auto;
+    right: 10px;
+    min-width: 160px;
+  }
+  .menu-item {
+    white-space: normal;
+  }
 }
 
 /* Content Area */
@@ -121,6 +154,7 @@ body {
   padding: 12px;
   font-size: 13px;
   line-height: 1.4;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Info Box */
@@ -199,7 +233,7 @@ body {
   right: 8px;
 }
 
-.delete-btn:hover {
+.delete-btn:hover, .delete-btn:active {
   box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #FFF;
 }
 
@@ -227,7 +261,7 @@ body {
   border: 1px solid #c0c0c0;
 }
 
-.item-image:hover {
+.item-image:hover, .item-image:active {
   opacity: 0.9;
   border: 1px solid #000;
 }
@@ -240,19 +274,24 @@ body {
   font-size: 10px;
   margin-right: 5px;
   margin-top: 5px;
-  padding: 2px 5px;
+  padding: 4px 8px;
 }
 
-/* Random Suggestion Popup */
+.edit-btn:active {
+  background: #a0a0a0;
+}
+
+/* Random Popup */
 .random-popup {
   border: 2px solid #000;
   background: #C0C0C0;
-  position: absolute;
-  top: 150px;
+  position: fixed;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   display: none;
   width: 350px;
+  max-width: 90%;
   padding: 0;
   z-index: 1000;
   box-shadow: 4px 4px 0 #7a7a7a;
@@ -318,7 +357,7 @@ body {
   box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #FFF;
 }
 
-.lightbox .close-lightbox:hover {
+.lightbox .close-lightbox:hover, .lightbox .close-lightbox:active {
   box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #FFF;
 }
 
@@ -348,20 +387,20 @@ body {
 .bucket-popup {
   border: 2px solid #000;
   background: #C0C0C0;
-  position: absolute;
-  top: 100px;
+  position: fixed;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   display: none;
   width: 400px;
   min-width: 300px;
-  max-width: 500px;
+  max-width: 90%;
   padding: 0;
   z-index: 1000;
   box-shadow: 4px 4px 0 #7a7a7a;
   flex-direction: column;
-  resize: both;
-  overflow: hidden;
+  max-height: 90%;
+  overflow: auto;
 }
 
 .bucket-popup .title-bar {
@@ -392,13 +431,12 @@ body {
 
 .bucket-popup .content {
   background: #dcdcdc;
-  padding: 8px;
+  padding: 12px;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-size: 13px;
   line-height: 1.4;
   overflow: auto;
   flex: 1 1 auto;
-  min-height: 0;
 }
 
 .bucket-popup .content input,
@@ -413,7 +451,7 @@ body {
 .retro-button {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-size: 13px;
-  padding: 4px 8px;
+  padding: 6px 12px;
   background: #C0C0C0;
   border: 2px solid #FFF;
   box-shadow: inset -2px -2px 0 #808080, inset 2px 2px 0 #FFF;
@@ -421,7 +459,7 @@ body {
   color: #000;
 }
 
-.retro-button:hover {
+.retro-button:hover, .retro-button:active {
   box-shadow: inset 2px 2px 0 #808080, inset -2px -2px 0 #FFF;
 }
 
@@ -446,17 +484,21 @@ body {
   }
   body, html {
     overflow: hidden;
+    height: 100%;
+  }
+  .menu {
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .menu-item, .dropdown-toggle {
+    font-size: 11px;
+    padding: 4px 8px;
   }
   .bucket-popup {
-    width: 400px;
-    height: 250px;
-    max-width: 90%;
-    max-height: 90%;
-  }
-  .dropdown-content {
-    position: fixed;
-    left: auto;
-    right: 10px;
+    width: 95%;
+    max-height: 80%;
   }
 }
 </style>
@@ -475,19 +517,19 @@ body {
     </div>
   </div>
 
-  <!-- Menu Bar with Help Dropdown -->
+  <!-- Menu Bar with Clickable Dropdown -->
   <div class="menu">
-    <span class="menu-item clickable" id="openAddWindow">➕ Add Item</span>
-    <span class="menu-item clickable" id="bulkAddWindow">📋 Bulk Add</span>
+    <span class="menu-item clickable" id="openAddWindow">➕ Add</span>
+    <span class="menu-item clickable" id="bulkAddWindow">📋 Bulk</span>
     <span class="menu-divider">|</span>
     <span class="menu-item clickable filter-option" data-filter="all" id="filterAll">📋 All</span>
-    <span class="menu-item clickable filter-option" data-filter="completed" id="filterCompleted">✅ Completed</span>
+    <span class="menu-item clickable filter-option" data-filter="completed" id="filterCompleted">✅ Done</span>
     <span class="menu-divider">|</span>
     <span class="menu-item clickable" id="randomItem">🎲 Random</span>
     <span class="menu-divider">|</span>
-    <div class="dropdown">
-      <span class="menu-item clickable">❓ Help ▼</span>
-      <div class="dropdown-content">
+    <div class="dropdown" id="helpDropdown">
+      <span class="dropdown-toggle" id="helpToggle">❓ Help ▼</span>
+      <div class="dropdown-content" id="helpDropdownContent">
         <span class="menu-item clickable" id="exportData">💾 Export Backup</span>
         <span class="menu-item clickable" id="importData">📂 Import Backup</span>
         <span class="menu-item clickable" id="howToUse">📖 How to Use</span>
@@ -498,9 +540,8 @@ body {
   <!-- Bucket list content -->
   <div class="content" id="bucketContainer">
     <div class="info-box">
-      📁 <strong>Image tip:</strong> Put photos in an <strong>images/</strong> folder. Type <strong>images/tokyo.jpg</strong> (or just <strong>tokyo.jpg</strong>) when adding images.<br>
-      ✏️ <strong>Edit title:</strong> Click on any title to edit it.<br>
-      🖼️ <strong>Enlarge photo:</strong> Click any image to zoom in.<br>
+      📁 <strong>Images:</strong> Put photos in an <strong>images/</strong> folder. Type <strong>images/photo.jpg</strong><br>
+      ✏️ <strong>Edit:</strong> Click any title to edit it. Tap images to enlarge.<br>
       🎲 <strong>Random:</strong> Get a random suggestion from your pending list!
     </div>
   </div>
@@ -536,7 +577,7 @@ body {
 <!-- Add Item Popup -->
 <div class="bucket-popup" id="bucketPopup">
   <div class="title-bar" id="popupTitleBar">
-    Add Bucket List Item
+    Add Item
     <div class="buttons">
       <span id="closePopup">X</span>
     </div>
@@ -545,7 +586,7 @@ body {
     <form id="bucketForm">
       <textarea id="itemTitle" placeholder="What do you want to do?" rows="2" required></textarea>
       <textarea id="itemNotes" placeholder="Notes (optional)" rows="3"></textarea>
-      <input type="text" id="itemImage" placeholder="images/filename.jpg (or just filename.jpg)">
+      <input type="text" id="itemImage" placeholder="images/filename.jpg">
       <button type="button" id="submitButton" class="retro-button">Save Item</button>
     </form>
   </div>
@@ -562,7 +603,7 @@ body {
   <div class="content">
     <form id="editForm">
       <textarea id="editNotes" placeholder="Your notes..." rows="4"></textarea>
-      <input type="text" id="editImage" placeholder="images/filename.jpg (or just filename.jpg)">
+      <input type="text" id="editImage" placeholder="images/filename.jpg">
       <input type="date" id="editDate">
       <button type="button" id="saveEditButton" class="retro-button">Save Changes</button>
     </form>
@@ -570,6 +611,41 @@ body {
 </div>
 
 <script src="bucketlist.js"></script>
+
+<script>
+// Mobile dropdown toggle - Add this to make dropdown work on mobile
+document.addEventListener('DOMContentLoaded', function() {
+  const helpToggle = document.getElementById('helpToggle');
+  const dropdownContent = document.getElementById('helpDropdownContent');
+  
+  if (helpToggle && dropdownContent) {
+    helpToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      // Close any other open dropdowns
+      document.querySelectorAll('.dropdown-content.show').forEach(function(drop) {
+        if (drop !== dropdownContent) {
+          drop.classList.remove('show');
+        }
+      });
+      dropdownContent.classList.toggle('show');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!helpToggle.contains(e.target) && !dropdownContent.contains(e.target)) {
+        dropdownContent.classList.remove('show');
+      }
+    });
+    
+    // Close dropdown when clicking an option
+    dropdownContent.querySelectorAll('.menu-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        dropdownContent.classList.remove('show');
+      });
+    });
+  }
+});
+</script>
 
 </body>
 </html>
