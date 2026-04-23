@@ -6,6 +6,293 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="bucketlist.css?v=2">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  background: #d97bb3; /* pink desktop */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: "MS Sans Serif", Tahoma, sans-serif;
+}
+
+/* Window Frame */
+.window {
+  width: 500px;
+  height: 600px;
+  background: #c0c0c0;
+  border: 2px solid #000;
+  box-shadow: 4px 4px 0px #7a7a7a;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Blue Title Bar */
+.title-bar {
+  background: #000080;
+  color: white;
+  padding: 4px 8px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Window Buttons */
+.buttons span {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  background: #c0c0c0;
+  border: 1px solid #000;
+  text-align: center;
+  line-height: 14px;
+  font-size: 11px;
+  color: black;
+  cursor: default;
+}
+
+/* Menu Bar */
+.menu {
+  background: #c0c0c0;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-bottom: 1px solid #808080;
+}
+
+.menu-item.clickable {
+  cursor: pointer;
+  color: #0000AA;
+}
+
+.menu-item.clickable:hover {
+  background-color: #000080;
+  color: #FFFFFF;
+}
+
+/* Content Area */
+.content {
+  background: #ffffff;
+  flex-grow: 1;
+  overflow-y: scroll;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Bucket Item Styles */
+.bucket-item {
+  margin-bottom: 18px;
+  padding: 8px;
+  border: 1px solid #c0c0c0;
+  background: #ffffff;
+}
+
+.bucket-item.completed {
+  background: #e8ffe8;
+}
+
+.item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.checkmark {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.item-title {
+  flex-grow: 1;
+  font-weight: bold;
+  word-break: break-word;
+}
+
+.item-title.completed-text {
+  text-decoration: line-through;
+  color: #666;
+}
+
+.delete-btn {
+  background: #c0c0c0;
+  border: 2px solid #FFF;
+  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #FFF;
+  cursor: pointer;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+.delete-btn:hover {
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #FFF;
+}
+
+.item-details {
+  margin-left: 24px;
+  font-size: 11px;
+  color: #555;
+}
+
+.completed-date {
+  margin: 4px 0;
+  color: #2d6a2d;
+}
+
+.item-notes {
+  margin: 4px 0;
+  font-style: italic;
+}
+
+.item-image {
+  max-width: 100%;
+  max-height: 150px;
+  margin-top: 5px;
+}
+
+.edit-btn {
+  background: #c0c0c0;
+  border: 1px solid #808080;
+  cursor: pointer;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  font-size: 10px;
+  margin-right: 5px;
+  margin-top: 5px;
+  padding: 2px 5px;
+}
+
+/* Progress Bar */
+.progress-section {
+  padding: 8px;
+  background: #c0c0c0;
+  border-top: 1px solid #808080;
+  font-size: 11px;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+}
+
+.progress-bar-bg {
+  background: #ffffff;
+  border: 1px solid #000;
+  height: 16px;
+  margin-top: 4px;
+}
+
+.progress-bar-fill {
+  background: #000080;
+  height: 100%;
+  width: 0%;
+}
+
+/* Popup (exact same style as review popup) */
+.bucket-popup {
+  border: 2px solid #000;
+  background: #C0C0C0;
+  position: absolute;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  width: 400px;
+  min-width: 300px;
+  max-width: 500px;
+  padding: 0;
+  z-index: 1000;
+  box-shadow: 4px 4px 0 #7a7a7a;
+  flex-direction: column;
+  resize: both;
+  overflow: hidden;
+}
+
+.bucket-popup .title-bar {
+  background: #000080;
+  color: #FFF;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  font-size: 13px;
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+}
+
+.bucket-popup .buttons span {
+  cursor: pointer;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  background: #c0c0c0;
+  border: 1px solid #000;
+  text-align: center;
+  line-height: 14px;
+  font-size: 11px;
+  color: black;
+}
+
+.bucket-popup .content {
+  background: #dcdcdc;
+  padding: 8px;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.bucket-popup .content input,
+.bucket-popup .content textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  font-size: 13px;
+}
+
+.retro-button {
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  font-size: 13px;
+  padding: 4px 8px;
+  background: #C0C0C0;
+  border: 2px solid #FFF;
+  box-shadow: inset -2px -2px 0 #808080, inset 2px 2px 0 #FFF;
+  cursor: pointer;
+  color: #000;
+}
+
+.retro-button:hover {
+  box-shadow: inset 2px 2px 0 #808080, inset -2px -2px 0 #FFF;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .window {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  body, html {
+    overflow: hidden;
+  }
+  .bucket-popup {
+    width: 400px;
+    height: 250px;
+    max-width: 90%;
+    max-height: 90%;
+  }
+}
+</style>
 </head>
 
 <body>
@@ -13,7 +300,7 @@
 <!-- Main Window -->
 <div class="window">
   <div class="title-bar">
-    Bucket List
+    📝 Bucket List
     <div class="buttons">
       <span>_</span>
       <span>□</span>
@@ -24,16 +311,16 @@
   <!-- Menu -->
   <div class="menu">
     File &nbsp; Edit &nbsp; View &nbsp;
-    <span class="menu-item clickable" id="openAddWindow">Add Item</span> &nbsp;
+    <span class="menu-item clickable" id="openAddWindow">➕ Add Item</span> &nbsp;
     Help
   </div>
 
   <!-- Bucket list content -->
   <div class="content" id="bucketContainer">
-    <!-- Items go here -->
+    <!-- Items will appear here -->
   </div>
 
-  <!-- Progress bar (stays inside window, above bottom edge) -->
+  <!-- Progress Bar -->
   <div class="progress-section">
     Progress: <span id="progressPercent">0</span>%
     <div class="progress-bar-bg">
@@ -42,7 +329,7 @@
   </div>
 </div>
 
-<!-- Add Item Popup (exact same style as Leave A Review popup) -->
+<!-- Add Item Popup -->
 <div class="bucket-popup" id="bucketPopup">
   <div class="title-bar" id="popupTitleBar">
     Add Bucket List Item
