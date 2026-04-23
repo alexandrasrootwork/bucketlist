@@ -61,11 +61,15 @@ body {
   padding: 4px 8px;
   font-size: 12px;
   border-bottom: 1px solid #808080;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
-.menu-item.clickable {
+.menu-item {
   cursor: pointer;
   color: #0000AA;
+  padding: 0 4px;
 }
 
 .menu-item.clickable:hover {
@@ -73,36 +77,14 @@ body {
   color: #FFFFFF;
 }
 
-/* Tabs */
-.tabs {
-  display: flex;
-  background: #c0c0c0;
-  border-bottom: 1px solid #808080;
-  padding: 2px 4px 0 4px;
-  gap: 2px;
+.menu-divider {
+  color: #808080;
+  margin: 0 4px;
 }
 
-.tab {
-  background: #c0c0c0;
-  padding: 4px 12px;
-  font-size: 11px;
-  font-family: 'MS Sans Serif', Tahoma, sans-serif;
-  cursor: pointer;
-  border: 1px solid #FFF;
-  border-bottom: none;
-  margin-right: 2px;
-}
-
-.tab.active {
-  background: #ffffff;
-  border: 1px solid #000;
-  border-bottom: 1px solid #ffffff;
-  margin-bottom: -1px;
-  font-weight: bold;
-}
-
-.tab:hover:not(.active) {
-  background: #d0d0d0;
+.menu-section {
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Content Area */
@@ -168,11 +150,6 @@ body {
   color: #666;
 }
 
-.item-title.editing {
-  background: #ffffcc;
-  outline: 1px solid #000;
-}
-
 .title-input {
   flex-grow: 1;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
@@ -235,7 +212,7 @@ body {
   padding: 2px 5px;
 }
 
-/* Lightbox for enlarged images */
+/* Lightbox */
 .lightbox {
   display: none;
   position: fixed;
@@ -378,6 +355,12 @@ body {
   box-shadow: inset 2px 2px 0 #808080, inset -2px -2px 0 #FFF;
 }
 
+/* Active filter indicator */
+.filter-active {
+  background-color: #000080;
+  color: #FFFFFF;
+}
+
 /* Mobile */
 @media (max-width: 768px) {
   .window {
@@ -417,19 +400,16 @@ body {
     </div>
   </div>
 
-  <!-- Menu -->
+  <!-- Menu Bar with Filters -->
   <div class="menu">
-    File &nbsp; Edit &nbsp; View &nbsp;
-    <span class="menu-item clickable" id="openAddWindow">➕ Add Item</span> &nbsp;
-    <span class="menu-item clickable" id="bulkAddWindow">📋 Bulk Add</span> &nbsp;
-    Help
-  </div>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab active" data-tab="all">📋 All Items</div>
-    <div class="tab" data-tab="completed">✅ Completed</div>
-    <div class="tab" data-tab="pending">⏳ Pending</div>
+    <span class="menu-item clickable" id="openAddWindow">➕ Add Item</span>
+    <span class="menu-item clickable" id="bulkAddWindow">📋 Bulk Add</span>
+    <span class="menu-divider">|</span>
+    <span class="menu-item clickable filter-option" data-filter="all" id="filterAll">📋 All</span>
+    <span class="menu-item clickable filter-option" data-filter="pending" id="filterPending">⏳ Pending</span>
+    <span class="menu-item clickable filter-option" data-filter="completed" id="filterCompleted">✅ Completed</span>
+    <span class="menu-divider">|</span>
+    <span class="menu-item">Help</span>
   </div>
 
   <!-- Bucket list content -->
@@ -437,7 +417,8 @@ body {
     <div class="info-box">
       📁 <strong>Image tip:</strong> Put photos in an <strong>images/</strong> folder. Type <strong>images/tokyo.jpg</strong> (or just <strong>tokyo.jpg</strong>) when adding images.<br>
       ✏️ <strong>Edit title:</strong> Click on any title to edit it.<br>
-      🖼️ <strong>Enlarge photo:</strong> Click any image to zoom in.
+      🖼️ <strong>Enlarge photo:</strong> Click any image to zoom in.<br>
+      🔍 <strong>Filter:</strong> Use the menu above to show All, Pending, or Completed items.
     </div>
   </div>
 
