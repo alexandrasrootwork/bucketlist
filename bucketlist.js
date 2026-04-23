@@ -241,65 +241,146 @@ function setFilter(filter) {
   render();
 }
 
-// --- EXPORT FUNCTION ---
+// --- MOBILE-FRIENDLY EXPORT FUNCTION ---
 function exportData() {
   const dataStr = JSON.stringify(bucketItems, null, 2);
-  const blob = new Blob([dataStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `bucketlist-backup-${new Date().toISOString().split('T')[0]}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  alert('✅ Bucket list exported successfully!');
+  
+  // Method 1: Try download (works on desktop and some mobile browsers)
+  try {
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bucketlist-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert('✅ Bucket list exported! Check your downloads folder.');
+  } catch (err) {
+    // Method 2: Copy to clipboard for mobile
+    copyToClipboard(dataStr);
+  }
 }
 
-// --- IMPORT FUNCTION ---
-function importData() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'application/json';
+// Copy to clipboard helper
+function copyToClipboard(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.top = '-1000px';
+  document.body.appendChild(textarea);
+  textarea.select();
   
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  try {
+    document.execCommand('copy');
+    alert('✅ Data copied to clipboard!\n\nOpen a text editor, paste, and save as .json file.\n\nTo import on another device, copy the JSON text and use Import.');
+  } catch (err) {
+    alert('❌ Could not copy. Your browser may not support this feature.');
+  }
+  
+  document.body.removeChild(textarea);
+}
+
+// --- MOBILE-FRIENDLY IMPORT FUNCTION ---
+function importData() {
+  // Create a mobile-friendly popup for pasting JSON
+  const importHtml = `
+    <div class="bucket-popup" id="importPopup" style="display:flex; width: 450px; max-width: 90%;">
+      <div class="title-bar" id="importTitleBar">
+        Import Bucket List
+        <div class="buttons">
+          <span id="closeImportPopup">X</span>
+        </div>
+      </div>
+      <div class="content">
+        <p style="font-size:11px; margin-bottom:8px;">Paste your exported JSON data below:</p>
+        <textarea id="importJsonData" placeholder='[{"id":123,"title":"Visit Japan","completed":false,...}]' rows="10" style="width:100%; box-sizing:border-box; font-family: monospace; font-size: 11px;"></textarea>
+        <p style="font-size:10px; color:#555; margin-top:5px;">Or <button type="button" id="uploadFileBtn" class="retro-button" style="margin-top:0; padding:2px 6px;">📁 Upload JSON file</button></p>
+        <button type="button" id="confirmImportButton" class="retro-button">Import Data</button>
+      </div>
+    </div>
+  `;
+  
+  const existing = document.getElementById('importPopup');
+  if (existing) existing.remove();
+  
+  document.body.insertAdjacentHTML('beforeend', importHtml);
+  
+  const importPopup = document.getElementById('importPopup');
+  const closeBtn = document.getElementById('closeImportPopup');
+  const confirmBtn = document.getElementById('confirmImportButton');
+  const textarea = document.getElementById('importJsonData');
+  const uploadBtn = document.getElementById('uploadFileBtn');
+  
+  dragElement(importPopup, 'importTitleBar');
+  
+  closeBtn.addEventListener('click', () => {
+    importPopup.remove();
+  });
+  
+  // Handle file upload (works on mobile!)
+  uploadBtn.addEventListener('click', () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json,application/json';
     
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const importedItems = JSON.parse(event.target.result);
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const content = event.target.result;
+          // Validate it's valid JSON
+          JSON.parse(content);
+          textarea.value = content;
+          alert('✅ File loaded! Click "Import Data" to confirm.');
+        } catch (err) {
+          alert('❌ Invalid JSON file. Make sure it\'s a valid bucket list export.');
+        }
+      };
+      reader.readAsText(file);
+    };
+    
+    fileInput.click();
+  });
+  
+  confirmBtn.addEventListener('click', () => {
+    const jsonText = textarea.value.trim();
+    if (!jsonText) {
+      alert('Please paste JSON data or upload a file.');
+      return;
+    }
+    
+    try {
+      const importedItems = JSON.parse(jsonText);
+      
+      if (Array.isArray(importedItems)) {
+        const valid = importedItems.every(item => 
+          item.hasOwnProperty('id') && 
+          item.hasOwnProperty('title') && 
+          item.hasOwnProperty('completed') !== undefined
+        );
         
-        // Validate the imported data
-        if (Array.isArray(importedItems)) {
-          // Check if each item has required fields
-          const valid = importedItems.every(item => 
-            item.hasOwnProperty('id') && 
-            item.hasOwnProperty('title') && 
-            item.hasOwnProperty('completed') !== undefined
-          );
-          
-          if (valid) {
-            if (confirm(`Import ${importedItems.length} items? This will replace your current bucket list.`)) {
-              bucketItems = importedItems;
-              saveData();
-              alert(`✅ Imported ${importedItems.length} items successfully!`);
-            }
-          } else {
-            alert('❌ Invalid file format. Some items missing required fields.');
+        if (valid) {
+          if (confirm(`Import ${importedItems.length} items? This will replace your current bucket list.`)) {
+            bucketItems = importedItems;
+            saveData();
+            alert(`✅ Imported ${importedItems.length} items successfully!`);
+            importPopup.remove();
           }
         } else {
-          alert('❌ Invalid file format. Expected an array of items.');
+          alert('❌ Invalid file format. Some items missing required fields (id, title, completed).');
         }
-      } catch (err) {
-        alert('❌ Error parsing file. Make sure it\'s a valid JSON file.');
+      } else {
+        alert('❌ Invalid format. Expected an array of items.');
       }
-    };
-    reader.readAsText(file);
-  };
-  
-  input.click();
+    } catch (err) {
+      alert('❌ Invalid JSON. Make sure you copied the entire export data correctly.');
+    }
+  });
 }
 
 // Bulk Add Function
